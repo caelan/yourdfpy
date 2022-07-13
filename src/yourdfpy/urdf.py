@@ -1032,12 +1032,11 @@ class URDF:
                 if geometry.mesh.scale is not None:
                     if isinstance(geometry.mesh.scale, float):
                         new_s = new_s.scaled(geometry.mesh.scale)
-                    elif isinstance(geometry.mesh.scale, np.ndarray):
-                        if not np.all(geometry.mesh.scale == geometry.mesh.scale[0]):
-                            _logger.warning(
-                                f"Warning: Can't scale axis independently, will use the first entry of '{geometry.mesh.scale}'"
-                            )
-                        new_s = new_s.scaled(geometry.mesh.scale[0])
+                    elif isinstance(geometry.mesh.scale, np.ndarray) and (len(geometry.mesh.scale) == 3):
+                        S = np.eye(4)
+                        S[:3, :3] = np.diag(geometry.mesh.scale)
+                        new_s = new_s.copy()
+                        new_s.apply_transform(S)
                     else:
                         _logger.warning(
                             f"Warning: Can't interpret scale '{geometry.mesh.scale}'"
